@@ -7,5 +7,5 @@ These are the members of group two:
 4. Alinda Atunga Alpha
 5. Kansiime Marina
 
-# A brief Documentation 
+# A brief Documentation about the Minibanking System
 
