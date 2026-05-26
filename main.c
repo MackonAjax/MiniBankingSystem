@@ -2,6 +2,6 @@
 
 
 int main(){
-
+    printf("Hello Mini Baking.");
     return 0;
 }
