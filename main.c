@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 
 // THESE ARE THE FUNCTION PROTOTYPES
@@ -158,14 +159,27 @@ void sign_up(){
 int validate_sign_up_details(char name[30], char phone_number[12], char password[30]){
     // this validates the sign up details.
     // return: 0 - okay; 1 - name error; 2 - phone number error; 3 - password error
-    if(1==0){
-        return 1;
+
+    //name validation: name should not be empty or contain characters
+    if (strlen(name) == 0); return 1; 
+    // for (int i = 0; name[i] != '\0'; i++) {
+    //     if (!isalpha((unsigned char)name[i])) {
+    //         return 1; // Found a number, space, or punctuation
+    //     }
+    // }
+    
+    // phone number validation: should be 10 digits and start with 0
+    if (strlen(phone_number) < 10 || phone_number[0] != '0') {
+        return 2; // Invalid length or does not start with 0
     }
-    if(1==0){
-        return 2;
+    for (int i = 0; phone_number[i] != '\0'; i++) {
+        if (!isdigit((unsigned char)phone_number[i]) && phone_number[i] != '\n') {
+            return 2;
+        }
     }
-    if(1==0){
-        return 3;
+    // password validation: should be between 6 and 30 characters
+    if (strlen(password) < 6 ) {
+        return 3; 
     }
     return 0;
 }
@@ -199,6 +213,7 @@ void users_dashboard(char name[30], char phone_number[12], char password[30], in
         printf("\n\t4. View Transaction History");
         printf("\n\t5. Log out");
         printf("\n\t6. Delete My Account.");
+        printf("\n\t7. See Full Account Information");
 
         printf("\nYou Can select an Option: ");
         int option;
@@ -276,6 +291,11 @@ void users_dashboard(char name[30], char phone_number[12], char password[30], in
                 printf("\n\n####YOUR ACCOUNT HAS BEEN SUCCESSFULLY DELETED. GOODBYE FRIEND.####\n\n");
                 break;
             }
+        }else if(option == 7){
+            printf("\n\n####FULL ACCOUNT INFORMATION####\n\n");
+            printf("Name: %s\n", name);
+            printf("Phone Number: %s\n", phone_number);
+            printf("Account Balance: %d\n", account_balance);
         }else{
             printf("\n########## PLEASE SELECT A VALID INTEGER OPTION ############");
             goto my_menu;
