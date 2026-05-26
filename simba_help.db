@@ -1,0 +1,20 @@
+
+
+#################################################################################
+                SIMBA HELP PAGE
+WELCOME TO THE SIMBA HELP PAGE
+------------------------------
+Simba is a Mini Banking System cofounded by Mandre, Haggai, Marina, Alpha and Gilbert.
+We offer no profits and charge minimal interest.
+To get started, sign up with us. You can then Send Money, Withdraw money and deposit 
+Money. 
+
+HOW TO DEPOSIT AND WITHDRAW MONEY
+    To deposit and withdraw money, you must visit Simba Mini Bank agent. The agent generates 
+for you a transaction token. Each transaction token is tied to a financial figure. You then enter
+the amount you want to withdraw or deposit along with the transation toke. If the values match, your 
+transaction proceeds. But if it fails, the transaction is declined.
+    
+You can get more assistance by using our website.
+#################################################################################
+

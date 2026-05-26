@@ -13,13 +13,16 @@ int validate_sign_up_details(char name[30], char phone_number[12], char password
 void write_user_to_file(char name[30], char phone_number[12], char password[30], int account_balance);
 void log_in();
 int read_user_from_file(char phone[12], char password[30], char *name, int *account_balance);
-void delete_account();
-void change_account_information();
+
+int update_account_details(char phone_number[12], char password[30], char new_name[30], char new_password[30]);
+void view_help_page();
 
 void users_dashboard(char name[30], char phone_number[12], char password[30], int account_balance);
-float deposit();
-float withdraw();
-float send_money();
+int deposit(int amount, int token, char phone_number[12], char password[30]);
+int withdraw(int amount, int t_token, char phone_number[12], char password[30]);
+int send_money();
+void view_my_transaction_history();
+int delete_my_account(char phone_number[12], char password[30]);
 
 int entry_menu();
 
@@ -62,7 +65,7 @@ int entry_menu(){
 
     }else if(option == 3){
 
-        printf(" 3 selected");
+        view_help_page(); // this shows the help page to the user
 
     }else if(option == 4){
 
@@ -173,7 +176,7 @@ void write_user_to_file(char name[30], char phone_number[12], char password[30],
     name[strcspn(name, "\n")] = '\0';
     phone_number[strcspn(phone_number, "\n")] = '\0';
     password[strcspn(password, "\n")] = '\0';
-    fprintf(file_ptr, "%s | %s | %s | %d\n", phone_number, name, password, account_balance);
+    fprintf(file_ptr, "%s|%s|%s|%d\n", phone_number, name, password, account_balance);
     fclose(file_ptr);
 }
 
@@ -191,7 +194,7 @@ void users_dashboard(char name[30], char phone_number[12], char password[30], in
         }
         my_menu:
         printf("\n\t1. Deposit Money");
-        printf("\n\t2. Send Money");
+        printf("\n\t2. Update Account Details (You can only change name and password)");
         printf("\n\t3. Withdraw Money");
         printf("\n\t4. View Transaction History");
         printf("\n\t5. Log out");
@@ -202,17 +205,77 @@ void users_dashboard(char name[30], char phone_number[12], char password[30], in
         scanf("%d", &option);
 
         if(option == 1){
+            // depositing money
+            deposit_money:
+            int amount, t_token;
+            printf("\n\tEnter Amount to deposit: ");
+            scanf("%d", &amount);
+            printf("\n\tEnter agents transaction token: ");
+            scanf("%d", &t_token);
+            if(amount <= 0){
+                printf("\n\n####PLEASE ENTER A VALID AMOUNT TO DEPOSIT.####\n\n");
+                goto deposit_money;
+            }
+
+            int deposit_result = deposit(amount, t_token, phone_number, password);
+            if(deposit_result == 1){
+                printf("\n\n####DEPOSIT SUCCESSFUL. YOUR ACCOUNT HAS BEEN CREDITED WITH %d.####\n\n", amount);
+                account_balance += amount; // update the account balance in the dashboard
+            }else if(deposit_result == 0){
+                printf("\n\n####DEPOSIT FAILED. INVALID TRANSACTION TOKEN.####\n\n");
+
+            }
 
         }else if(option == 2){
+            // updating account details
+            update_account_details:
+            char new_name[30];
+            char new_password[30];
+            printf("\n\tEnter New Name: ");
+            scanf("%s", new_name);
+            printf("\n\tEnter New Password: ");
+            scanf("%s", new_password);
 
+            int update_result = update_account_details(phone_number, password, new_name, new_password);
+            if(update_result == 1){
+                printf("\n\n####ACCOUNT DETAILS UPDATED SUCCESSFULLY.####\n\n");
+                // update the name and password in the dashboard
+                strcpy(name, new_name);
+                strcpy(password, new_password);
+            }else{
+                printf("\n\n####UPDATE FAILED. INVALID CREDENTIALS.####\n\n");
+                goto update_account_details;
+            }
         }else if(option == 3){
+            // withdrawing money
+            withdraw_money:
+            int amount, t_token;
+            printf("\n\tEnter Amount to withdraw: ");
+            scanf("%d", &amount);
+            printf("\n\tEnter agents transaction token: ");
+            scanf("%d", &t_token);
+            if(amount <= 0){
+                printf("\n\n####PLEASE ENTER A VALID AMOUNT TO WITHDRAW.####\n\n");
+                goto withdraw_money;
+            }
 
+            int withdraw_result = withdraw(amount, t_token, phone_number, password);
+            if(withdraw_result == 1){
+                printf("\n\n####WITHDRAWAL SUCCESSFUL. YOUR ACCOUNT HAS BEEN DEBITED BY %d.####\n\n", amount);
+                account_balance -= amount; // update the account balance in the dashboard
+            }else if(withdraw_result == 0){
+                printf("\n\n####WITHDRAWAL FAILED. INVALID TRANSACTION TOKEN OR INSUFFICIENT FUNDS.####\n\n");
+            }
         }else if(option == 4){
-
+            printf("\n\n####THIS OPTION IS NOT AVAILABLE YET. IT WILL BE IN A FUTURE RELEASE.####\n\n");
         }else if(option == 5){
             break;
         }else if(option == 6){
-            
+            int delete_result = delete_my_account(phone_number, password);
+            if(delete_result == 1){
+                printf("\n\n####YOUR ACCOUNT HAS BEEN SUCCESSFULLY DELETED. GOODBYE FRIEND.####\n\n");
+                break;
+            }
         }else{
             printf("\n########## PLEASE SELECT A VALID INTEGER OPTION ############");
             goto my_menu;
@@ -287,4 +350,228 @@ int read_user_from_file(char phone_number[12], char password[30], char *name, in
 
     fclose(file_ptr);
     return state;
+}
+
+void view_help_page(){
+    FILE *file_ptr = fopen("./simba_help.db", "r");
+    char line[256];
+    while(fgets(line, sizeof(line), file_ptr) != NULL){
+        printf("%s", line);
+    }
+    fclose(file_ptr);
+}
+
+int deposit(int amount, int t_token, char phone_number[12], char password[30]){
+    // this function handles depositing of money to the users account
+    // it takes in the amount to be deposited and the agents transaction token as parameters
+    // it returns 1 if the deposit is successful and 0 if it fails
+
+    // for testing purposes, we will use 123456
+    if(t_token == 123456){
+
+        FILE *file_ptr = fopen("./simba_users.db", "r");
+        if(file_ptr == NULL){
+            return 2; // this returns 2 if the file is not found
+        }
+
+        FILE *temp_file_ptr = fopen("./temp.db", "a");
+
+        char user_data[256]; 
+        char credential_holder[4][30];
+        
+        int state = 0;
+        while(fgets(user_data, sizeof(user_data), file_ptr) != NULL){
+
+            int i = 0;
+            char *token = strtok(user_data, "|");
+            while(token != NULL && i < 4){
+                // this loop splits the user data into phone number, name, password and account balance
+                // and stores them in the credential_holder array
+                token[strcspn(token, "\n")] = '\0'; // remove newline character
+                credential_holder[i][0] = '\0'; // clear the string before copying new data
+                strncpy(credential_holder[i], token, sizeof(credential_holder[i]) - 1);
+                i++;
+                token = strtok(NULL, "|");
+            }
+
+            // printf("\nCurrent line phone number: %s, password: %s", credential_holder[0], credential_holder[2]);
+
+            if(strcmp(credential_holder[0], phone_number) == 0 && strcmp(credential_holder[2], password) == 0){
+                // this checks if the phone number and password match the current line in the file
+                int current_balance = atoi(credential_holder[3]);
+                int new_balance = current_balance + amount;
+                snprintf(credential_holder[3], sizeof(credential_holder[3]), "%d", new_balance); // update the balance in the credential holder
+            }
+            fprintf(temp_file_ptr, "%s|%s|%s|%s\n", credential_holder[0], credential_holder[1], credential_holder[2], credential_holder[3]);
+        }
+        fclose(file_ptr);
+        fclose(temp_file_ptr);
+        remove("./simba_users.db"); // remove the old file
+        rename("./temp.db", "./simba_users.db"); // rename the temp file to the old databse file name
+
+        
+    
+
+        return 1;
+    }else{
+        return 0;  // unsuccesful
+    }
+}
+
+int withdraw(int amount, int t_token, char phone_number[12], char password[30]){
+    // this one is for withdrawing money from the users account. 
+
+    // we shall still use  123456
+    if(t_token == 123456){
+
+        FILE *file_ptr = fopen("./simba_users.db", "r");
+        if(file_ptr == NULL){
+            return 2; // this returns 2 if the file is not found
+        }
+
+        FILE *temp_file_ptr = fopen("./temp.db", "a");
+
+        char user_data[256]; 
+        char credential_holder[4][30];
+        
+        int state = 0;
+        while(fgets(user_data, sizeof(user_data), file_ptr) != NULL){
+
+            int i = 0;
+            char *token = strtok(user_data, "|");
+            while(token != NULL && i < 4){
+                // this loop splits the user data into phone number, name, password and account balance
+                // and stores them in the credential_holder array
+                token[strcspn(token, "\n")] = '\0'; // remove newline character
+                credential_holder[i][0] = '\0'; // clear the string before copying new data
+                strncpy(credential_holder[i], token, sizeof(credential_holder[i]) - 1);
+                i++;
+                token = strtok(NULL, "|");
+            }
+
+            // printf("\nCurrent line phone number: %s, password: %s", credential_holder[0], credential_holder[2]);
+
+            if(strcmp(credential_holder[0], phone_number) == 0 && strcmp(credential_holder[2], password) == 0){
+                // this checks if the phone number and password match the current line in the file
+                int current_balance = atoi(credential_holder[3]);
+
+                // check if the user has sufficient balance to withdraw
+                if(current_balance >= amount){
+                    int new_balance = current_balance - amount;
+                    snprintf(credential_holder[3], sizeof(credential_holder[3]), "%d", new_balance); // update the balance in the credential holder
+                }else{
+                    // user does not have sufficient balance
+                    return 0; // return 0 if the user has insufficient funds
+                }
+            }
+            fprintf(temp_file_ptr, "%s|%s|%s|%s\n", credential_holder[0], credential_holder[1], credential_holder[2], credential_holder[3]);
+        }
+        fclose(file_ptr);
+        fclose(temp_file_ptr);
+        remove("./simba_users.db"); // remove the old file
+        rename("./temp.db", "./simba_users.db"); // rename the temp file to the old databse file name
+
+        
+    
+
+        return 1;
+    }else{
+        return 0;  // unsuccesful
+    }
+
+    return 0;
+}
+
+int delete_my_account(char phone_number[12], char password[30]){
+    // this function deletes the users account from the database file
+    FILE *file_ptr = fopen("./simba_users.db", "r");
+        if(file_ptr == NULL){
+            return 2; // this returns 2 if the file is not found
+        }
+
+        FILE *temp_file_ptr = fopen("./temp.db", "a");
+
+        char user_data[256]; 
+        char credential_holder[4][30];
+        
+        int state = 0;
+        while(fgets(user_data, sizeof(user_data), file_ptr) != NULL){
+
+            int i = 0;
+            char *token = strtok(user_data, "|");
+            while(token != NULL && i < 4){
+                // this loop splits the user data into phone number, name, password and account balance
+                // and stores them in the credential_holder array
+                token[strcspn(token, "\n")] = '\0'; // remove newline character
+                credential_holder[i][0] = '\0'; // clear the string before copying new data
+                strncpy(credential_holder[i], token, sizeof(credential_holder[i]) - 1);
+                i++;
+                token = strtok(NULL, "|");
+            }
+
+            // printf("\nCurrent line phone number: %s, password: %s", credential_holder[0], credential_holder[2]);
+
+            if(strcmp(credential_holder[0], phone_number) == 0 && strcmp(credential_holder[2], password) == 0){
+                // this checks if the phone number and password match the current line in the file
+                
+                continue; // skip for that particular account being deleted
+            }
+
+            fprintf(temp_file_ptr, "%s|%s|%s|%s\n", credential_holder[0], credential_holder[1], credential_holder[2], credential_holder[3]);
+            
+        }
+        fclose(file_ptr);
+        fclose(temp_file_ptr);
+        remove("./simba_users.db"); // remove the old file
+        rename("./temp.db", "./simba_users.db"); // rename the temp file to the old databse file name
+
+    return 1;
+
+}
+
+int update_account_details(char phone_number[12], char password[30], char new_name[30], char new_password[30]){
+    // this function updates the users account details in the database file
+    FILE *file_ptr = fopen("./simba_users.db", "r");
+        if(file_ptr == NULL){
+            return 2; // this returns 2 if the file is not found
+        }
+
+        FILE *temp_file_ptr = fopen("./temp.db", "a");
+
+        char user_data[256]; 
+        char credential_holder[4][30];
+        
+        int state = 0;
+        while(fgets(user_data, sizeof(user_data), file_ptr) != NULL){
+
+            int i = 0;
+            char *token = strtok(user_data, "|");
+            while(token != NULL && i < 4){
+                // this loop splits the user data into phone number, name, password and account balance
+                // and stores them in the credential_holder array
+                token[strcspn(token, "\n")] = '\0'; // remove newline character
+                credential_holder[i][0] = '\0'; // clear the string before copying new data
+                strncpy(credential_holder[i], token, sizeof(credential_holder[i]) - 1);
+                i++;
+                token = strtok(NULL, "|");
+            }
+
+            // printf("\nCurrent line phone number: %s, password: %s", credential_holder[0], credential_holder[2]);
+
+            if(strcmp(credential_holder[0], phone_number) == 0 && strcmp(credential_holder[2], password) == 0){
+                // this checks if the phone number and password match the current line in the file
+                
+                strncpy(credential_holder[1], new_name, sizeof(credential_holder[1]) - 1); // update name
+                strncpy(credential_holder[2], new_password, sizeof(credential_holder[2]) - 1); // update password
+            }
+
+            fprintf(temp_file_ptr, "%s|%s|%s|%s\n", credential_holder[0], credential_holder[1], credential_holder[2], credential_holder[3]);
+            
+        }
+        fclose(file_ptr);
+        fclose(temp_file_ptr);
+        remove("./simba_users.db"); // remove the old file
+        rename("./temp.db", "./simba_users.db"); // rename the temp file to the old databse file name
+
+    return 1;
 }
