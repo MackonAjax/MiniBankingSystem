@@ -1,26 +1,22 @@
 // A MINI BANKING SYSTEM FROM GROUP TWO
 
 #include <stdio.h>
-<<<<<<< Updated upstream
-// this is the mini banking system 
-
-int main(){
-    printf("Hello Mini Baking.");
-=======
 #include <string.h>
+#include <stdlib.h>
 
 
 // THESE ARE THE FUNCTION PROTOTYPES
 
 // AUTHENTICATION FUNCTIONS
 void sign_up();
-int validate_sign_up_details(char name[30], char phone_number[11], char password[30]);
-void write_user_to_file(char name[30], char phone_number[11], char password[30], int account_balance);
+int validate_sign_up_details(char name[30], char phone_number[12], char password[30]);
+void write_user_to_file(char name[30], char phone_number[12], char password[30], int account_balance);
 void log_in();
+int read_user_from_file(char phone[12], char password[30], char *name, int *account_balance);
 void delete_account();
 void change_account_information();
 
-void users_dashboard(char name[30], char phone_number[11], char password[30], int account_balance);
+void users_dashboard(char name[30], char phone_number[12], char password[30], int account_balance);
 float deposit();
 float withdraw();
 float send_money();
@@ -38,7 +34,6 @@ int main(){
         }
     }
 
->>>>>>> Stashed changes
     return 0;
 }
 
@@ -63,7 +58,7 @@ int entry_menu(){
 
     }else if(option == 2){
 
-        printf(" 2 selected");
+       log_in(); // login to an existing account
 
     }else if(option == 3){
 
@@ -123,11 +118,12 @@ void sign_up(){
             // everything is set, the account can be registered now.
 
             write_user_to_file(name, phone_number, password, initial_deposit);  // registering the user now
-            users_dashboard(name, phone_number, password, initial_deposit);
 
             printf("\n########################################################################################");
-            printf("\t\tCONGRATULATIONS, YOUR SIMBA ACCOUNT HAS SUCCESSFULLY BEEN REGISTERED.");
+            printf("\t\t\nCONGRATULATIONS, YOUR SIMBA ACCOUNT HAS SUCCESSFULLY BEEN REGISTERED.");
             printf("\n#######################################################################################");
+
+            users_dashboard(name, phone_number, password, initial_deposit);
         }else{
             printf("\n####PLEASE ENTER A PROPER INITIAL DEPOSIT VALUE.\n");
             goto account_creation;
@@ -156,7 +152,7 @@ void sign_up(){
 
 }
 
-int validate_sign_up_details(char name[30], char phone_number[11], char password[30]){
+int validate_sign_up_details(char name[30], char phone_number[12], char password[30]){
     // this validates the sign up details.
     // return: 0 - okay; 1 - name error; 2 - phone number error; 3 - password error
     if(1==0){
@@ -171,7 +167,7 @@ int validate_sign_up_details(char name[30], char phone_number[11], char password
     return 0;
 }
 
-void write_user_to_file(char name[30], char phone_number[11], char password[30], int account_balance){
+void write_user_to_file(char name[30], char phone_number[12], char password[30], int account_balance){
     FILE *file_ptr = fopen("./simba_users.db", "a");
     // first strip away the \n before writing to file.
     name[strcspn(name, "\n")] = '\0';
@@ -181,7 +177,7 @@ void write_user_to_file(char name[30], char phone_number[11], char password[30],
     fclose(file_ptr);
 }
 
-void users_dashboard(char name[30], char phone_number[11], char password[30], int account_balance){
+void users_dashboard(char name[30], char phone_number[12], char password[30], int account_balance){
     // this function prints the users dashboard after sign up or login
     
     // this loops you as a signed in user till you break
@@ -231,14 +227,64 @@ void log_in(){
     char password[30];
     printf("\n\nHELLO, PLEASE LOGIN TO YOUR SIMBA ACCOUNT.");
     printf("\nEnter q to quit here.");
-    printf("\n\tName: ")
+    printf("\n\tPhone Number: ");
     scanf("%s", phone_number);
     
-    if(phone_number == "q"){return;}
+    if(strcmp(phone_number, "q") == 0){return;}
 
     printf("\n\tPassword: ");
     scanf("%s", password);
 
     // this compares phone_number and password to existing account details
+    char name[30];
+    int account_balance;
+    int result = read_user_from_file(phone_number, password, name, &account_balance);
+    printf("\nResult of read_user_from_file: %d", result);
+    if(result == 1){
+        users_dashboard(name, phone_number, password, account_balance);
+    }else{
+        printf("\n\n####INVALID CREDENTIALS. PASSWORD AND PHONE NUMBER DO NOT MATCH ####\n\n");
+        log_in();
+    }
+}
 
+int read_user_from_file(char phone_number[12], char password[30], char *name, int *account_balance){
+
+    FILE *file_ptr = fopen("./simba_users.db", "r");
+    if(file_ptr == NULL){
+        return 2; // this returns 2 if the file is not found
+    }
+
+    char user_data[256]; 
+    char credential_holder[4][30];
+    
+    int state = 0;
+    // printf("\n%s", fgets(user_data, sizeof(user_data), file_ptr));
+    while(fgets(user_data, sizeof(user_data), file_ptr) != NULL){
+
+        int i = 0;
+        char *token = strtok(user_data, "|");
+        while(token != NULL && i < 4){
+            // this loop splits the user data into phone number, name, password and account balance
+            // and stores them in the credential_holder array
+            token[strcspn(token, "\n")] = '\0'; // remove newline character
+            credential_holder[i][0] = '\0'; // clear the string before copying new data
+            strncpy(credential_holder[i], token, sizeof(credential_holder[i]) - 1);
+            i++;
+            token = strtok(NULL, "|");
+        }
+
+        // printf("\nCurrent line phone number: %s, password: %s", credential_holder[0], credential_holder[2]);
+
+        if(strcmp(credential_holder[0], phone_number) == 0 && strcmp(credential_holder[2], password) == 0){
+            // this checks if the phone number and password match the current line in the file
+            state = 1; // this means the credentials are correct
+            strncpy(name, credential_holder[1], 30); // copy the name to the name pointer
+            *account_balance = atoi(credential_holder[3]); // copy the account balance to the pointer
+            break;
+        }
+    }
+
+    fclose(file_ptr);
+    return state;
 }
