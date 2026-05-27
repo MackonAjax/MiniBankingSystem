@@ -123,9 +123,9 @@ void sign_up(){
 
             write_user_to_file(name, phone_number, password, initial_deposit);  // registering the user now
 
-            printf("\n########################################################################################");
+            printf("\n=======================================================================================");
             printf("\t\t\nCONGRATULATIONS, YOUR SIMBA ACCOUNT HAS SUCCESSFULLY BEEN REGISTERED.");
-            printf("\n#######################################################################################");
+            printf("\n=======================================================================================");
 
             users_dashboard(name, phone_number, password, initial_deposit);
         }else{
@@ -161,7 +161,8 @@ int validate_sign_up_details(char name[30], char phone_number[12], char password
     // return: 0 - okay; 1 - name error; 2 - phone number error; 3 - password error
 
     //name validation: name should not be empty or contain characters
-    if (strlen(name) == 0); return 1; 
+    if (strlen(name) == 0) 
+        return 1; 
     // for (int i = 0; name[i] != '\0'; i++) {
     //     if (!isalpha((unsigned char)name[i])) {
     //         return 1; // Found a number, space, or punctuation
@@ -199,9 +200,9 @@ void users_dashboard(char name[30], char phone_number[12], char password[30], in
     
     // this loops you as a signed in user till you break
     while(1){
-        printf("\n\n######################################################################");
-        printf("\n######################################################################");
+        printf("\n========================================================================\n");
         printf("\nHELLO %s, WELCOME TO SIMBA MINI BANK.", name);
+        printf("\n========================================================================\n");
         printf("\nPHONE NUMBER: %s    :::    ACCOUNT BALANCE: %d", phone_number, account_balance);
         if(account_balance <= 15000){
             printf("\nYour Account Balance is a bit low. Please Consider depositing Money.");
