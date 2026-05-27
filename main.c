@@ -98,12 +98,15 @@ void sign_up(){
     printf("\n\nWELCOME TO SIMBA ACCOUNT CREATION. PLEASE FILL IN THE FOLLOWING OPTIONS.\n");
     printf("\n\tName: ");
     fgets(name, sizeof(name), stdin);
+    name[strcspn(name, "\n")] =  '\0'; // remove the trailing newline character from the name input
 
     printf("\n\tPhone Number: ");
     fgets(phone_number, sizeof(phone_number), stdin);
+     phone_number[strcspn(phone_number, "\n")] = '\0'; // remove the trailing newline character from the phone number input
 
     printf("\n\tPassword: ");
     fgets(password, sizeof(password), stdin);
+    password[strcspn(password, "\n")] = '\0'; //remove the trailing newline character from the input password.
 
     // the validate_sign_up_details function is called to validate the details.
     // if it returns 0 - sign up credentials are okay
