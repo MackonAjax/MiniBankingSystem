@@ -1,0 +1,565 @@
+% ============================================================
+%  Simba Mini Banking System – Technical Report
+%  TEMB 1202: Computing II | Kyambogo University | Group Two
+% ============================================================
+\documentclass[12pt, a4paper]{article}
+
+% ---------- Packages ----------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{mdframed}
+
+% ---------- Colour palette (black & white only) ----------
+\definecolor{codeGray}{RGB}{245, 245, 245}
+\definecolor{commentGreen}{RGB}{80, 80, 80}
+\definecolor{keywordBlue}{RGB}{0, 0, 0}
+\definecolor{stringRed}{RGB}{0, 0, 0}
+
+% ---------- Listings (C code) ----------
+\lstdefinestyle{cstyle}{
+    backgroundcolor=\color{codeGray},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{black}\bfseries,
+    commentstyle=\color{black}\itshape,
+    stringstyle=\color{black},
+    numberstyle=\tiny\color{black},
+    breaklines=true,
+    breakatwhitespace=false,
+    numbers=left,
+    numbersep=8pt,
+    frame=single,
+    rulecolor=\color{black},
+    tabsize=4,
+    showstringspaces=false,
+    captionpos=b,
+    language=C
+}
+\lstset{style=cstyle}
+
+% ---------- Section formatting ----------
+\titleformat{\section}
+    {\Large\bfseries\color{black}}
+    {\thesection.}{0.6em}{}[\titlerule]
+
+\titleformat{\subsection}
+    {\large\bfseries\color{black}}
+    {\thesubsection}{0.5em}{}
+
+\titleformat{\subsubsection}
+    {\normalsize\bfseries\color{black}}
+    {\thesubsubsection}{0.4em}{}
+
+% ---------- Header / Footer ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{black}\textbf{TEMB 1202 – Computing II}}
+\fancyhead[R]{\small\color{black}Simba Mini Banking System}
+\fancyfoot[C]{\small\color{black}Page \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ---------- Hyperref ----------
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=black,
+    pdftitle={Simba Mini Banking System – Technical Report},
+    pdfauthor={Group Two, Kyambogo University}
+}
+
+% ---------- Spacing ----------
+\setstretch{1.15}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+% ============================================================
+\begin{document}
+
+% ======================== TITLE PAGE ========================
+\begin{titlepage}
+    \centering
+    \vspace*{1.5cm}
+
+    {\Large\bfseries\color{black} Kyambogo University}\\[0.3cm]
+    {\normalsize Department of Biomedical and Mechatronics Engineering}\\[0.1cm]
+    {\normalsize TEMB 1202: Computing II Assignment}
+
+    \vspace{1.2cm}
+    \textcolor{black}{\rule{12cm}{2pt}}
+    \vspace{0.5cm}
+
+    {\Huge\bfseries\color{black} SIMBA MINI}\\[0.3cm]
+    {\Huge\bfseries\color{black} BANKING SYSTEM}
+
+    \vspace{0.4cm}
+    {\large\itshape Technical Report \& Documentation}
+
+    \textcolor{black}{\rule{12cm}{2pt}}
+
+    \vspace{1.5cm}
+
+    \begin{tabular}{rl}
+        \textbf{Group}      & Two \\[4pt]
+        \textbf{Course}     & TEMB 1202 – Computing II \\[4pt]
+        \textbf{Assignment} & Mini Banking System (Group 2) \\[4pt]
+        \textbf{Language}   & C (Standard C99) \\[4pt]
+        \textbf{File}       & \texttt{mini\_banking\_system.c} \\[4pt]
+        \textbf{Source Code}& \href{https://github.com/MackonAjax/MiniBankingSystem/blob/main/main.c}{\texttt{github.com/MackonAjax/MiniBankingSystem}} \\
+    \end{tabular}
+
+    \vfill
+    {\small\color{black} Kyambogo University $\cdot$ Department of Biomedical and Mechatronics Engineering}
+\end{titlepage}
+
+% ======================== TOC ========================
+\tableofcontents
+\thispagestyle{fancy}
+\newpage
+
+% ======================== SECTIONS ========================
+
+\section{Introduction / Problem Statement}
+
+The \textbf{Simba Mini Banking System} is a menu-driven C program developed as part of
+the TEMB 1202 Computing~II course assignment at Kyambogo University. The assignment
+required Group Two to design and implement a fully functional banking simulation that
+demonstrates core C programming concepts including functions, file I/O, loops, conditional
+statements, arrays, and string handling. The full source code is available on GitHub at
+\href{https://github.com/MackonAjax/MiniBankingSystem/blob/main/main.c}{\texttt{github.com/MackonAjax/MiniBankingSystem}}.
+
+The central problem addressed is the lack of a lightweight, terminal-based tool that
+simulates real-world banking operations — account creation, authentication, money
+deposits, withdrawals, balance tracking, and account management — entirely in C without
+reliance on external databases or graphical interfaces.
+
+The program stores user account data persistently in a flat-file database
+(\texttt{simba\_users.db}), allowing information to survive between program sessions. It
+enforces business rules such as minimum opening balance, withdrawal limits, and
+low-balance warnings, giving it the feel of a real banking application.
+
+% -------------------------------------------------------
+\section{System Features}
+
+\begin{description}[leftmargin=2em, labelwidth=!, labelindent=0pt,
+                    font=\bfseries\color{black}]
+
+    \item[Account Registration (Sign Up)]
+        New users can create a Simba Bank account by providing their full name, phone
+        number, and a password. The system validates all inputs and requires a minimum
+        opening deposit of UGX~10{,}000 before the account is created.
+
+    \item[Authentication (Log In)]
+        Existing users authenticate using their registered phone number and password.
+        The system reads from the persistent flat-file database to verify credentials,
+        rejecting unrecognised or incorrect details.
+
+    \item[Deposit Money]
+        Authenticated users may deposit any positive amount into their account. A
+        transaction confirmation message is displayed after every successful deposit.
+
+    \item[Withdraw Money]
+        Withdrawals are processed with checks: the balance must not drop below the
+        minimum required threshold, and a warning is displayed for unusually large
+        withdrawal amounts.
+
+    \item[Send Money]
+        Users can transfer funds to another registered Simba Bank account using the
+        recipient's phone number, subject to the same balance constraints as
+        withdrawals.
+
+    \item[View Transaction History]
+        The dashboard provides an option to display a summary of past transactions
+        performed on the account during the current session.
+
+    \item[Account Information Update]
+        Users can update their stored account details (name, phone number, password)
+        from within the authenticated dashboard.
+
+    \item[Account Deletion]
+        Users may permanently close and delete their account from the system.
+
+    \item[Balance Advisory]
+        Whenever the account balance falls at or below UGX~15{,}000, the system
+        automatically displays an advisory message encouraging the user to make a
+        deposit.
+
+    \item[Persistent File Storage]
+        All account records are saved to \texttt{simba\_users.db} using C file~I/O,
+        ensuring data is retained between program runs.
+
+    \item[Continuous Operation]
+        The application runs in a continuous loop until the user explicitly selects the
+        \textit{Quit} option from the main entry menu.
+
+\end{description}
+
+% -------------------------------------------------------
+\section{Program Design and Structure}
+
+\subsection{Architecture Overview}
+
+The program follows a \textbf{modular, function-based architecture}. The \texttt{main()}
+function acts solely as an application controller, running a loop that calls
+\texttt{entry\_menu()} and exits when a sentinel value (\texttt{10}) is returned. All
+business logic is encapsulated in dedicated functions, improving readability and
+maintainability.
+
+\subsection{Module / Function Map}
+
+\begin{longtable}{>{\bfseries\color{black}}p{3.5cm}
+                  >{\ttfamily}p{5cm}
+                  p{6cm}}
+    \toprule
+    \normalfont\bfseries Module & \normalfont\bfseries Functions & \normalfont\bfseries Responsibility \\
+    \midrule
+    \endfirsthead
+    \toprule
+    \normalfont\bfseries Module & \normalfont\bfseries Functions & \normalfont\bfseries Responsibility \\
+    \midrule
+    \endhead
+    \bottomrule
+    \endfoot
+
+    Entry \& Navigation   & entry\_menu()
+                          & Main menu loop; routes user to sign-up, login, help, or quit \\[6pt]
+
+    Authentication        & sign\_up()\newline log\_in()
+                          & Account creation and credential verification \\[6pt]
+
+    Validation            & validate\_sign\_up\_details()
+                          & Input sanity-checks for name, phone, and password \\[6pt]
+
+    File Persistence      & write\_user\_to\_file()
+                          & Appends new account records to \texttt{simba\_users.db} \\[6pt]
+
+    User Dashboard        & users\_dashboard()
+                          & Post-login hub: deposit, withdraw, send, history, logout, delete \\[6pt]
+
+    Transactions          & deposit()\newline withdraw()\newline send\_money()
+                          & Core financial operations with rule enforcement \\[6pt]
+
+    Account Management    & delete\_account()\newline change\_account\_information()
+                          & Account deletion and info updates \\
+
+\end{longtable}
+
+\subsection{Data Flow}
+
+When the program starts, \texttt{main()} calls \texttt{entry\_menu()} in a loop. Selecting
+option~1 triggers \texttt{sign\_up()}, which collects input, calls
+\texttt{validate\_sign\_up\_details()}, and — on success — calls
+\texttt{write\_user\_to\_file()} to persist the record, then immediately forwards the session
+to \texttt{users\_dashboard()}. Selecting option~2 invokes \texttt{log\_in()}, which reads
+\texttt{simba\_users.db} to authenticate the user before loading the dashboard. All
+subsequent operations (deposit, withdraw, send, etc.) are handled from within the
+dashboard loop.
+
+\subsection{File Storage Format}
+
+Account records are stored one per line in \texttt{simba\_users.db} using a
+\textbf{pipe-delimited format}:
+
+\begin{mdframed}[backgroundcolor=codeGray, linecolor=black,
+                 linewidth=0.8pt, innerleftmargin=10pt, innerrightmargin=10pt,
+                 innertopmargin=8pt, innerbottommargin=8pt]
+\texttt{phone\_number | name | password | account\_balance}\\
+\texttt{e.g.\ \ 0712345678 | John Doe | pass123 | 50000}
+\end{mdframed}
+
+The file is opened in append mode (\texttt{"a"}) during registration, ensuring existing
+records are never overwritten.
+
+% -------------------------------------------------------
+\section{Important Functions Used}
+
+\subsection{\texttt{entry\_menu()}}
+
+\textbf{Return type:} \texttt{int} \quad \textbf{Parameters:} none
+
+The gateway function of the entire application. It renders the main menu and dispatches
+the user's selection to the appropriate handler. Returning the value \texttt{10} signals the
+main loop to terminate. Invalid integer input triggers a recursive call to redisplay the menu.
+
+\begin{lstlisting}[caption={Skeleton of \texttt{entry\_menu()}}]
+int entry_menu(){
+    // Displays main menu: Create Account | Login | Help | Quit
+    // Returns 10 to break the main application loop on Quit
+    ...
+    if(option == 4){ return 10; }
+    ...
+}
+\end{lstlisting}
+
+\subsection{\texttt{sign\_up()}}
+
+\textbf{Return type:} \texttt{void} \quad \textbf{Parameters:} none
+
+Manages the full account-creation flow. It flushes the input buffer after \texttt{scanf()} to
+prevent stale newline characters from corrupting \texttt{fgets()} calls, collects
+name/phone/password via \texttt{fgets()}, delegates validation, prompts for an initial
+deposit (minimum UGX~10{,}000 enforced with a \texttt{goto} retry loop), persists the
+record, and launches the user dashboard.
+
+\begin{lstlisting}[caption={Pseudocode outline of \texttt{sign\_up()}}]
+void sign_up(){
+    // 1. Flush \n from stdin
+    // 2. Collect name, phone_number, password via fgets()
+    // 3. Call validate_sign_up_details() -- retry on failure
+    // 4. Enforce minimum deposit >= 10,000 (goto retry)
+    // 5. write_user_to_file() then users_dashboard()
+}
+\end{lstlisting}
+
+\subsection{\texttt{validate\_sign\_up\_details()}}
+
+\textbf{Return type:} \texttt{int} \quad
+\textbf{Parameters:} \texttt{name[30]}, \texttt{phone\_number[11]}, \texttt{password[30]}
+
+A dedicated validation layer that checks each input field independently and returns a
+numeric error code:
+\begin{itemize}
+    \item \textbf{0} — all valid
+    \item \textbf{1} — name error
+    \item \textbf{2} — phone number error
+    \item \textbf{3} — password error (must be 6–30 characters)
+\end{itemize}
+This separation of concerns keeps \texttt{sign\_up()} clean and makes future validation
+rule changes straightforward.
+
+\subsection{\texttt{write\_user\_to\_file()}}
+
+\textbf{Return type:} \texttt{void} \quad
+\textbf{Parameters:} \texttt{name}, \texttt{phone\_number}, \texttt{password},
+\texttt{account\_balance}
+
+Responsible for persisting a new account to disk. Before writing, it strips trailing newline
+characters from all string fields using \texttt{strcspn()} — a critical step because
+\texttt{fgets()} includes the newline in the captured string. The record is appended with
+\texttt{fprintf()} in the pipe-delimited format described in Section~\ref{sec:design}.
+
+\begin{lstlisting}[caption={Implementation of \texttt{write\_user\_to\_file()}}]
+void write_user_to_file(char name[30], char phone_number[11],
+                        char password[30], int account_balance){
+    FILE *file_ptr = fopen("./simba_users.db", "a");
+    name[strcspn(name, "\n")]               = '\0'; // strip newline
+    phone_number[strcspn(phone_number,"\n")]= '\0';
+    password[strcspn(password, "\n")]       = '\0';
+    fprintf(file_ptr, "%s | %s | %s | %d\n",
+            phone_number, name, password, account_balance);
+    fclose(file_ptr);
+}
+\end{lstlisting}
+
+\subsection{\texttt{users\_dashboard()}}
+
+\textbf{Return type:} \texttt{void} \quad
+\textbf{Parameters:} \texttt{name}, \texttt{phone\_number}, \texttt{password},
+\texttt{account\_balance}
+
+The post-authentication control hub. It loops continuously, displaying the account holder's
+name, phone number, current balance, and an advisory message if the balance is at or
+below UGX~15{,}000. The user chooses from six options:
+
+\begin{enumerate}
+    \item Deposit
+    \item Send Money
+    \item Withdraw
+    \item View History
+    \item Log Out
+    \item Delete Account
+\end{enumerate}
+
+Selecting \textit{Log Out} breaks the inner loop, returning control to \texttt{entry\_menu()}.
+
+\subsection{\texttt{log\_in()}}
+
+\textbf{Return type:} \texttt{void} \quad \textbf{Parameters:} none
+
+Collects the user's phone number and password, then searches \texttt{simba\_users.db}
+for a matching record. On success it loads \texttt{users\_dashboard()} with the retrieved
+account data.
+
+\begin{mdframed}[backgroundcolor=yellow!12, linecolor=black,
+                 linewidth=1pt, innerleftmargin=10pt, innerrightmargin=10pt,
+                 innertopmargin=8pt, innerbottommargin=8pt]
+\textbf{Note:} A syntax error (missing semicolon after a \texttt{printf} call) and a string
+comparison bug (using \texttt{==} instead of \texttt{strcmp()}) are present in the current
+draft and are flagged under Section~6 (Challenges).
+\end{mdframed}
+
+% -------------------------------------------------------
+\section{Design Decisions and Justifications}
+\label{sec:design}
+
+\subsection{Flat-file Database (\texttt{simba\_users.db})}
+
+A plain-text, pipe-delimited file was chosen for persistence because it requires no external
+libraries, is human-readable for debugging, and is entirely within the scope of C standard
+I/O. The append mode (\texttt{'a'}) guarantees that adding a new account never corrupts
+existing records.
+
+\subsection{\texttt{fgets()} over \texttt{scanf()} for String Input}
+
+\texttt{scanf()} with \texttt{\%s} stops at whitespace, making it unsuitable for capturing
+full names. \texttt{fgets()} reads entire lines including spaces, providing a more robust
+input method. A deliberate buffer-flush loop
+(\texttt{while~(getchar()~!=~'\textbackslash n')}) is used before \texttt{fgets()} calls to
+discard the newline left by prior \texttt{scanf()} calls.
+
+\subsection{Modular Function Architecture}
+
+Every logical action — validation, file writing, menu display, dashboard — is encapsulated
+in its own function. This matches the assignment's requirement for user-defined functions
+and makes individual components independently testable and replaceable.
+
+\subsection{Numeric Sentinel Return (\texttt{10}) from \texttt{entry\_menu()}}
+
+Instead of a global flag variable, a specific return value (\texttt{10}) communicates the
+exit intent up to \texttt{main()}. This keeps side effects minimal and makes the control
+flow explicit and easy to trace.
+
+\subsection{\texttt{goto} for Retry Logic in \texttt{sign\_up()}}
+
+A labelled \texttt{goto} is used to retry the initial deposit prompt when the user enters a
+value below the minimum. While \texttt{goto} is generally discouraged in modern C, its use
+here is localised, clearly labelled (\texttt{account\_creation:}), and avoids introducing an
+additional nested function or loop just for a single validation step.
+
+\subsection{Minimum Opening Balance of UGX~10{,}000}
+
+A minimum opening deposit enforces the assignment rule that \textit{``a new account must
+start with a minimum opening balance,''} preventing zero-balance ghost accounts and
+mirroring real banking practice.
+
+\subsection{Low-Balance Advisory at UGX~15{,}000}
+
+The threshold is set deliberately above the 10{,}000 minimum so that users receive a
+warning before reaching the absolute floor, giving them time to act. This reflects the
+assignment rule: \textit{``if the balance becomes too low, advise the user to deposit
+money.''}
+
+\subsection{\texttt{strcspn()} for Newline Stripping}
+
+\texttt{fgets()} captures the trailing newline as part of the string. Using
+\texttt{strcspn(str,~"\textbackslash n")} to locate and null-terminate at that position is a
+clean, standard-library approach that avoids manual iteration and is less error-prone than
+alternatives like \texttt{strtok()}.
+
+% -------------------------------------------------------
+\section{Challenges Encountered}
+
+\subsection{Input Buffer Contamination}
+
+Mixed use of \texttt{scanf()} (for integers) and \texttt{fgets()} (for strings) caused the
+newline character left in \texttt{stdin} by \texttt{scanf()} to be immediately consumed by
+the subsequent \texttt{fgets()} call, resulting in empty string captures. This was resolved
+by inserting a buffer-flush loop:
+
+\begin{lstlisting}[caption={Buffer-flush idiom}]
+while ((c = getchar()) != '\n' && c != EOF);
+\end{lstlisting}
+
+between the two input methods wherever they appear together.
+
+\subsection{Trailing Newlines in File Records}
+
+\texttt{fgets()} includes the newline at the end of captured strings. Without stripping
+these, the database records would contain embedded newlines, breaking the pipe-delimited
+format and causing comparison failures during login. \texttt{strcspn()} was applied to all
+three string fields before writing to file.
+
+\subsection{String Comparison in \texttt{log\_in()}}
+
+The draft \texttt{log\_in()} function contains the line:
+
+\begin{lstlisting}[caption={Bug: pointer comparison instead of string comparison}]
+if(phone_number == "q"){ return; }  // BUG: compares pointer address
+\end{lstlisting}
+
+This compares a pointer address rather than string contents — always evaluating false in
+C. The correct approach is:
+
+\begin{lstlisting}[caption={Fix: use \texttt{strcmp()}}]
+if(strcmp(phone_number, "q") == 0){ return; }  // CORRECT
+\end{lstlisting}
+
+This is a known bug in the current version and is scheduled for correction.
+
+\subsection{Missing Semicolon in \texttt{log\_in()}}
+
+A syntax error — a missing semicolon after a \texttt{printf()} call in \texttt{log\_in()} —
+prevents the current code from compiling as written. This was identified during code review
+and will be patched before the final submission.
+
+\subsection{Git Merge Conflict in Source File}
+
+The repository history shows an unresolved Git merge conflict in the source file
+(\texttt{<<<<<<< Updated upstream} / \texttt{>>>>>>> Stashed changes} markers). The
+conflict arose when team members developed separate branches simultaneously without
+coordinating a merge. The conflict was manually resolved by retaining the more complete
+``Stashed changes'' version of \texttt{main()}.
+
+\subsection{Recursive \texttt{sign\_up()} Calls on Validation Failure}
+
+Early iterations used recursive calls to \texttt{sign\_up()} on validation failure, which
+risks stack overflow if a user enters invalid data many times in succession. A future
+improvement would replace recursion with an iterative loop within \texttt{sign\_up()}
+itself.
+
+\subsection{Incomplete Transaction Functions}
+
+The \texttt{deposit()}, \texttt{withdraw()}, and \texttt{send\_money()} function bodies
+remain as stubs in the current version. Their logic — updating the in-memory balance and
+rewriting the file record — is planned but not yet implemented. This is the primary remaining
+development task before the submission deadline.
+
+% -------------------------------------------------------
+\section{Conclusion}
+
+The \textbf{Simba Mini Banking System} successfully demonstrates the application of core C
+programming concepts in a practical, real-world context. The program achieves its primary
+objectives: it provides a continuous menu-driven interface, enforces simple authentication,
+supports account creation with validation and minimum-balance rules, and persists data
+across sessions using file I/O. The complete source code is hosted publicly at
+\href{https://github.com/MackonAjax/MiniBankingSystem/blob/main/main.c}{\texttt{github.com/MackonAjax/MiniBankingSystem}}.
+
+The modular design — with clearly named, single-responsibility functions — makes the
+codebase readable, maintainable, and extensible. The deliberate separation of validation
+logic (\texttt{validate\_sign\_up\_details()}), persistence
+(\texttt{write\_user\_to\_file()}), and presentation (\texttt{users\_dashboard()}) reflects
+sound software engineering principles even within the constraints of an introductory C
+assignment.
+
+A number of known issues — the string comparison bug in \texttt{log\_in()}, the missing
+semicolon, and the incomplete transaction function bodies — have been identified and
+documented. These will be resolved before the final submission. The team also intends to
+replace recursive retry logic with iterative loops to improve robustness.
+
+Overall, the project provided valuable hands-on experience with practical C challenges
+such as buffer management, file~I/O, input validation, and collaborative version control.
+The lessons learned — particularly around mixed input methods and Git merge discipline —
+will directly inform better practices in future development work.
+
+\vspace{1.5cm}
+\begin{center}
+    \textcolor{black}{\rule{10cm}{1pt}}\\[0.4cm]
+    {\small\itshape Group Two $\;\cdot\;$ TEMB 1202: Computing II $\;\cdot\;$
+    Kyambogo University}
+\end{center}
+
+\end{document}
