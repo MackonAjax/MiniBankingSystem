@@ -9,14 +9,14 @@ These are the members of group two:
 6. Okiria Jorem
 
 # A brief Documentation about the Minibanking System
-We have decided to call this Mini banking platofrom as SIMBA for better reference. The mini banking system gives you a menu when you run it. 
+We have decided to call this Mini banking platform as SIMBA for better reference. The mini banking system gives you a menu when you run it. 
 1. Create a Simba account
 2. Log in to my Simba account
 3. View Help Page
 4. Quit
    
 # Creating a new account
-When you select option you, you are promoted to create a new accoutn. The program asks you for your name, phone number and password. 
+When you select option you, you are promoted to create a new accout. The program asks you for your name, phone number and password. 
 The name cannot be an empty string. Your phone number must be 10 characters long and should start with 0 not the country code.
 Your password can be any character of your choice but must be between 6 to 30 characters.
 Once you have entered your credentials, the program asks you for an initial deposit, this initial deposit must be above 10 thousand Ugandan shillings. Account creation cannot continue if you dont provide this.
